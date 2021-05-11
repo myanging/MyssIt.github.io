@@ -1,0 +1,261 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>spring源码学习 | MyangingのBlog</title><meta name="keywords" content="spring,spring源码"><meta name="author" content="Myanging"><meta name="copyright" content="Myanging"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="杂谈IOCSmartInitializingSingleton 实例化完后调用这个接口的方法afterSingletonsInstantiated()比如定时任务的启动 ClassPathBeanDefinitionScanner 可以扫描注入类 123456public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring源码学习">
+<meta property="og:url" content="https://myanging.github.io/2021/05/11/spring%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="MyangingのBlog">
+<meta property="og:description" content="杂谈IOCSmartInitializingSingleton 实例化完后调用这个接口的方法afterSingletonsInstantiated()比如定时任务的启动 ClassPathBeanDefinitionScanner 可以扫描注入类 123456public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry r">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://myanging.github.io/banner/1.jpg">
+<meta property="article:published_time" content="2021-05-11T02:45:27.000Z">
+<meta property="article:modified_time" content="2021-05-11T06:30:22.109Z">
+<meta property="article:author" content="Myanging">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="spring源码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://myanging.github.io/banner/1.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://myanging.github.io/2021/05/11/spring%E5%AD%A6%E4%B9%A0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'spring源码学习',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-05-11 14:30:22'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    })(window)</script><style type="text/css">header#page-header{background: none;} #page-header {background-image: none !important;} #page-header:before {opacity: 0;}</style><style type="text/css">body {cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/pointer.cur),default;}a,img {cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/pointer.cur), default;}</style><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/tx.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 媒体</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fab fa-youtube"></i><span> 番剧</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw far fa-image"></i><span> 相册</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/talk/"><i class="fa-fw far fa-comment"></i><span> 微语</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/banner/1.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">MyangingのBlog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 媒体</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fab fa-youtube"></i><span> 番剧</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw far fa-image"></i><span> 相册</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/talk/"><i class="fa-fw far fa-comment"></i><span> 微语</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">spring源码学习</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-05-11T02:45:27.000Z" title="发表于 2021-05-11 10:45:27">2021-05-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-05-11T06:30:22.109Z" title="更新于 2021-05-11 14:30:22">2021-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/spring/">spring</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="spring源码学习"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="杂谈IOC"><a href="#杂谈IOC" class="headerlink" title="杂谈IOC"></a>杂谈IOC</h1><h3 id="SmartInitializingSingleton"><a href="#SmartInitializingSingleton" class="headerlink" title="SmartInitializingSingleton"></a><code>SmartInitializingSingleton</code></h3><ul>
+<li><p>实例化完后调用这个接口的方法<code>afterSingletonsInstantiated()</code>比如定时任务的启动</p>
+<h3 id="ClassPathBeanDefinitionScanner"><a href="#ClassPathBeanDefinitionScanner" class="headerlink" title="ClassPathBeanDefinitionScanner"></a><code>ClassPathBeanDefinitionScanner</code></h3></li>
+<li><p>可以扫描注入类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postProcessBeanDefinitionRegistry</span><span class="params">(BeanDefinitionRegistry registry)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">    ClassPathBeanDefinitionScanner scanner = <span class="keyword">new</span> ClassPathBeanDefinitionScanner(registry);</span><br><span class="line">      <span class="comment">//需要过滤的注解</span></span><br><span class="line">    scanner.addIncludeFilter(<span class="keyword">new</span> AnnotationTypeFilter(MyService.class));</span><br><span class="line">    scanner.scan(<span class="string">&quot;com.enjoy.jack.customBean&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="各种姿势导入BeanDefinition类"><a href="#各种姿势导入BeanDefinition类" class="headerlink" title="各种姿势导入BeanDefinition类"></a>各种姿势导入<code>BeanDefinition</code>类</h3><ul>
+<li><code>BeanDefinitionRegistryPostProcessor</code>实现了<code>BeanFactoryPostProcessor</code><br><img src="/spring/BeanDefinitionRegistryPostProcessor.png"></li>
+<li><code>ImportBeanDefinitionRegistrar</code><br><img src="/spring/ImportBeanDefinitionRegistrar.png"></li>
+<li><code>ImportSelector</code><br><img src="/spring/ImportSelector.png"></li>
+<li><code>DeferredImportSelector</code>涉及一个Group的实现目前没有去梳理<br><img src="/spring/DeferredImportSelector.png"></li>
+</ul>
+<h3 id="多个很重要的类"><a href="#多个很重要的类" class="headerlink" title="多个很重要的类"></a>多个很重要的类</h3><ul>
+<li>执行方法是 </li>
+</ul>
+<div class="tabs" id="方法"><ul class="nav-tabs"><li class="tab"><button type="button" data-href="#方法-1">方法 1</button></li><li class="tab active"><button type="button" data-href="#方法-2">方法 2</button></li></ul><div class="tab-contents"><div class="tab-item-content" id="方法-1"><pre><code> <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> AnnotationConfigApplicationContext() </span><br><span class="line">-&gt;<span class="keyword">this</span>.reader = <span class="keyword">new</span> AnnotatedBeanDefinitionReader(<span class="keyword">this</span>)</span><br><span class="line">-&gt;<span class="keyword">this</span>(registry, getOrCreateEnvironment(registry))</span><br><span class="line">-&gt;AnnotationConfigUtils.registerAnnotationConfigProcessors(<span class="keyword">this</span>.registry)</span><br><span class="line">-&gt;registerAnnotationConfigProcessors(registry, <span class="keyword">null</span>)</span><br></pre></td></tr></table></figure>
+ 
+</code></pre><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content active" id="方法-2"><pre><code>  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;spring.xml&quot;</span>)</span><br><span class="line">&gt;<span class="keyword">this</span>(<span class="keyword">new</span> String[] &#123;configLocation&#125;, <span class="keyword">true</span>, <span class="keyword">null</span>)</span><br><span class="line">&gt;refresh()</span><br><span class="line">&gt;ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory()</span><br><span class="line">&gt;refreshBeanFactory()</span><br><span class="line">&gt;loadBeanDefinitions(beanFactory)</span><br><span class="line">&gt;doLoadBeanDefinitions(inputSource, encodedResource.getResource())</span><br><span class="line">&gt;<span class="keyword">int</span> count = registerBeanDefinitions(doc, resource)</span><br><span class="line">&gt;documentReader.registerBeanDefinitions(doc, createReaderContext(resource))</span><br><span class="line">&gt;doRegisterBeanDefinitions(doc.getDocumentElement())</span><br><span class="line">&gt;parseBeanDefinitions(root, <span class="keyword">this</span>.delegate)</span><br><span class="line">&gt;delegate.parseCustomElement(ele) </span><br><span class="line">&gt;NamespaceHandlerSupport.parse(ele, <span class="keyword">new</span> ParserContext(<span class="keyword">this</span>.readerContext, <span class="keyword">this</span>, containingBd))</span><br><span class="line">&gt;ComponentScanBeanDefinitionParser.parser(element, parserContext)</span><br><span class="line">&gt;registerComponents(parserContext.getReaderContext(), beanDefinitions, element)</span><br><span class="line">&gt;AnnotationConfigUtils.registerAnnotationConfigProcessors(readerContext.getRegistry(), source)</span><br></pre></td></tr></table></figure>
+</code></pre><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div>
+
+<ul>
+<li>路线寻找中会有一个很重要的类<code>ComponentScanBeanDefinitionParser</code>和<code>ComponentScanAnnotationParser</code>,前一个是XML解析用的，后面一个是注解解析用的</li>
+<li><code>ConfigurationClassPostProcessor </code>配置类后置处理器</li>
+<li><code>AutowiredAnnotationBeanPostProcessor</code>和<code>CommonAnnotationBeanPostProcessor</code>是实现了<code>InitDestroyAnnotationBeanPostProcessor</code>这个作用是主要放入初始销毁方法的注解<code>@PostConstruct</code>，<code>@PreDestroy</code>和<code>@Resource</code>这个java原生注解，后面类完成的时候调用初始和销毁方法。</li>
+</ul>
+<h3 id="多实例，别样的注入姿势"><a href="#多实例，别样的注入姿势" class="headerlink" title="多实例，别样的注入姿势"></a>多实例，别样的注入姿势</h3><ul>
+<li>当有一个类有多个实体的时候，必须用<code>@Qualifier</code>指定别名，否者获取就会报错，同时用<code>getBean(Class class)</code>方法已经会报错了，报错描述是<code>bean found among candidates: [lison2, lison3]</code></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Conditional(value = &#123;CustomCondition.class, CustomCondition1.class&#125;)</span></span><br><span class="line"><span class="meta">@Primary</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Lison <span class="title">lison2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Lison();</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Conditional(value = &#123;CustomCondition.class, CustomCondition1.class&#125;)</span></span><br><span class="line"><span class="meta">@Primary</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Lison <span class="title">lison3</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Lison();</span><br><span class="line">&#125;</span><br><span class="line">	</span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="meta">@Qualifier(&quot;lison2&quot;)</span></span><br><span class="line">Lison lison2;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="meta">@Qualifier(&quot;lison3&quot;)</span></span><br><span class="line">Lison lison3;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="aop"><a href="#aop" class="headerlink" title="aop"></a><code>aop</code></h1><h3 id="MethodInterceptor方法拦截器"><a href="#MethodInterceptor方法拦截器" class="headerlink" title="MethodInterceptor方法拦截器"></a><code>MethodInterceptor</code>方法拦截器</h3><h1 id="spring-boot"><a href="#spring-boot" class="headerlink" title="spring boot"></a>spring boot</h1><h3 id="ConfigurationProperties注解剖析"><a href="#ConfigurationProperties注解剖析" class="headerlink" title="ConfigurationProperties注解剖析"></a><code>ConfigurationProperties</code>注解剖析</h3><ul>
+<li>注意<code>ConfigurationProperties</code>这个注解，是在类实例化后<code>ConfigurationPropertiesBindingPostProcessor</code>去执行解析绑定操作</li>
+</ul>
+<h1 id="mvc"><a href="#mvc" class="headerlink" title="mvc"></a>mvc</h1><h3 id="启动加载"><a href="#启动加载" class="headerlink" title="启动加载"></a>启动加载</h3><ul>
+<li><code>StandardContext#startInternal()#this.listenerStart()</code>调用<code>ContextLoaderListener</code>这个监听</li>
+<li>执行初始化映射关联<code>@EnableWebMvc#@Import(DelegatingWebMvcConfiguration.class)#RequestMappingHandlerMapping requestMappingHandlerMapping()</code>创建号<code>RequestMappingHandlerMapping</code>时候调用<code>InitializingBean#afterPropertiesSet()#initHandlerMethods()#processCandidateBean(beanName)</code>生成一个很关键的一个对象<code>RequestMappingInfo</code></li>
+</ul>
+<h1 id="数据库动态路由"><a href="#数据库动态路由" class="headerlink" title="数据库动态路由"></a>数据库动态路由</h1><h3 id="AbstractRoutingDataSource实现"><a href="#AbstractRoutingDataSource实现" class="headerlink" title="AbstractRoutingDataSource实现"></a><code>AbstractRoutingDataSource</code>实现</h3><ul>
+<li>1.<code>aop</code>切面</li>
+<li>2.继承<code>AbstractRoutingDataSource </code>其实实现一个钩子方法<code>determineCurrentLookupKey</code>，当选择数据源的时候取值的时候从Map里去取。</li>
+<li>3.配置主从<code>masterDataSource</code>，<code>slaveDataSource</code></li>
+<li>4.配置动态数据源<code>myRoutingDataSource</code></li>
+<li>5.配置<code>getSqlSessionFactoryBean</code></li>
+<li>6.一般是配合<code>ThreadLocal</code>容器来动态管理这个切换</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbConfig</span> <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;mybatis.mapperLocations&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mapperXmlPath;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ApplicationContext applicationContext;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;masterDataSource&quot;)</span></span><br><span class="line">    <span class="meta">@ConfigurationProperties(&quot;c3p0-master&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSource <span class="title">getMasterDataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> DataSourceBuilder.create().build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;slaveDataSource&quot;)</span></span><br><span class="line">    <span class="meta">@ConfigurationProperties(&quot;c3p0-slave&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSource <span class="title">getSlaveDataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DataSource dataSource = DataSourceBuilder.create().build();</span><br><span class="line">        <span class="keyword">return</span> dataSource;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;myRoutingDataSource&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSource <span class="title">myRoutingDataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Map&lt;Object, Object&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        map.put(DataSourceType.MASTER, getMasterDataSource());</span><br><span class="line">        map.put(DataSourceType.SLVAE, getSlaveDataSource());</span><br><span class="line">        MyRoutingDataSource myRoutingDataSource = <span class="keyword">new</span> MyRoutingDataSource();</span><br><span class="line">        myRoutingDataSource.setTargetDataSources(map);</span><br><span class="line">        myRoutingDataSource.setDefaultTargetDataSource(getMasterDataSource());</span><br><span class="line">        <span class="keyword">return</span> myRoutingDataSource;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SqlSessionFactoryBean <span class="title">getSqlSessionFactoryBean</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        SqlSessionFactoryBean sqlSessionBean = <span class="keyword">new</span> SqlSessionFactoryBean();</span><br><span class="line">        sqlSessionBean.setDataSource(myRoutingDataSource());</span><br><span class="line">  sqlSessionBean.setMapperLocations(applicationContext.getResources(<span class="string">&quot;classpath*:mapper/*.xml&quot;</span>));</span><br><span class="line">      sqlSessionBean.setMapperLocations(applicationContext.getResources(mapperXmlPath));</span><br><span class="line">        <span class="keyword">return</span> sqlSessionBean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setApplicationContext</span><span class="params">(ApplicationContext applicationContext)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.applicationContext = applicationContext;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyRoutingDataSource</span> <span class="keyword">extends</span> <span class="title">AbstractRoutingDataSource</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Object <span class="title">determineCurrentLookupKey</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> DataSourceHolder.get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Myanging</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://myanging.github.io/2021/05/11/spring%E5%AD%A6%E4%B9%A0/">https://myanging.github.io/2021/05/11/spring%E5%AD%A6%E4%B9%A0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://myanging.github.io" target="_blank">MyangingのBlog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/spring/">spring</a><a class="post-meta__tags" href="/tags/spring%E6%BA%90%E7%A0%81/">spring源码</a></div><div class="post_share"><div class="social-share" data-image="/banner/1.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/05/11/%E7%AE%97%E6%B3%95/"><img class="next-cover" src="/banner/0.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">算法</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/tx.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Myanging</div><div class="author-info__description">爱生活，爱美女，爱游戏</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/myanging"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/myanging" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:568358827@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客庄园，以后一起学习，一起进步! <img class="entered loading" style="width:100%;" src="/img/tx.png" data-ll-status="loading"></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%82%E8%B0%88IOC"><span class="toc-number">1.</span> <span class="toc-text">杂谈IOC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SmartInitializingSingleton"><span class="toc-number">1.0.1.</span> <span class="toc-text">SmartInitializingSingleton</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ClassPathBeanDefinitionScanner"><span class="toc-number">1.0.2.</span> <span class="toc-text">ClassPathBeanDefinitionScanner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E5%A7%BF%E5%8A%BF%E5%AF%BC%E5%85%A5BeanDefinition%E7%B1%BB"><span class="toc-number">1.0.3.</span> <span class="toc-text">各种姿势导入BeanDefinition类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AA%E5%BE%88%E9%87%8D%E8%A6%81%E7%9A%84%E7%B1%BB"><span class="toc-number">1.0.4.</span> <span class="toc-text">多个很重要的类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E5%AE%9E%E4%BE%8B%EF%BC%8C%E5%88%AB%E6%A0%B7%E7%9A%84%E6%B3%A8%E5%85%A5%E5%A7%BF%E5%8A%BF"><span class="toc-number">1.0.5.</span> <span class="toc-text">多实例，别样的注入姿势</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#aop"><span class="toc-number">2.</span> <span class="toc-text">aop</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MethodInterceptor%E6%96%B9%E6%B3%95%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-number">2.0.1.</span> <span class="toc-text">MethodInterceptor方法拦截器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#spring-boot"><span class="toc-number">3.</span> <span class="toc-text">spring boot</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ConfigurationProperties%E6%B3%A8%E8%A7%A3%E5%89%96%E6%9E%90"><span class="toc-number">3.0.1.</span> <span class="toc-text">ConfigurationProperties注解剖析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mvc"><span class="toc-number">4.</span> <span class="toc-text">mvc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E5%8A%A0%E8%BD%BD"><span class="toc-number">4.0.1.</span> <span class="toc-text">启动加载</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1"><span class="toc-number">5.</span> <span class="toc-text">数据库动态路由</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AbstractRoutingDataSource%E5%AE%9E%E7%8E%B0"><span class="toc-number">5.0.1.</span> <span class="toc-text">AbstractRoutingDataSource实现</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/05/11/spring%E5%AD%A6%E4%B9%A0/" title="spring源码学习"><img src="/banner/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="spring源码学习"/></a><div class="content"><a class="title" href="/2021/05/11/spring%E5%AD%A6%E4%B9%A0/" title="spring源码学习">spring源码学习</a><time datetime="2021-05-11T02:45:27.000Z" title="发表于 2021-05-11 10:45:27">2021-05-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/11/%E7%AE%97%E6%B3%95/" title="算法"><img src="/banner/0.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="算法"/></a><div class="content"><a class="title" href="/2021/05/11/%E7%AE%97%E6%B3%95/" title="算法">算法</a><time datetime="2021-05-11T02:45:27.000Z" title="发表于 2021-05-11 10:45:27">2021-05-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/10/hello-world/" title="Hello World"><img src="https://cdn.jsdelivr.net/gh/jerryc127/CDN@latest/cover/default_bg.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2021/05/10/hello-world/" title="Hello World">Hello World</a><time datetime="2021-05-10T01:55:15.127Z" title="发表于 2021-05-10 09:55:15">2021-05-10</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 <i id="heartbeat" class="fa fas fa-heartbeat" style="color:red;" ></i> Myanging</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'AlJN9ut5f0VsOpj3IjQsVuhf-MdYXbMMI',
+      appKey: 'cW0mYP5HWIojU7c6gn9UA6sw',
+      placeholder: 'Please leave your footprints',
+      avatar: 'mp',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-show-text.min.js" data-mobile="false" data-text="I,LOVE,YOU" data-fontsize="15px" data-random="false" async="async"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
