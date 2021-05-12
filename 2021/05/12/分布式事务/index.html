@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分布式事务 | MyangingのBlog</title><meta name="keywords" content="分布式事务,base理论,cap理论,2pc,3pc,XA协议"><meta name="author" content="Myanging"><meta name="copyright" content="Myanging"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="分布式事务产生的原因 随着互联网高速发展，事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点 之上。简单的说，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用。在这种 环境中，我们之前说过数据库的 ACID 四大特性，已经无法满足我们分布式事务。 本质上来说，分布式事务就是为了保证不同数据库的数据一致性。  CAP 理论">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务">
+<meta property="og:url" content="https://myanging.github.io/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="MyangingのBlog">
+<meta property="og:description" content="分布式事务产生的原因 随着互联网高速发展，事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点 之上。简单的说，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用。在这种 环境中，我们之前说过数据库的 ACID 四大特性，已经无法满足我们分布式事务。 本质上来说，分布式事务就是为了保证不同数据库的数据一致性。  CAP 理论">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://myanging.github.io/banner/3.jpg">
+<meta property="article:published_time" content="2021-05-12T06:40:45.000Z">
+<meta property="article:modified_time" content="2021-05-12T08:24:05.138Z">
+<meta property="article:author" content="Myanging">
+<meta property="article:tag" content="分布式事务">
+<meta property="article:tag" content="base理论">
+<meta property="article:tag" content="cap理论">
+<meta property="article:tag" content="2pc">
+<meta property="article:tag" content="3pc">
+<meta property="article:tag" content="XA协议">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://myanging.github.io/banner/3.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://myanging.github.io/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '分布式事务',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-05-12 16:24:05'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    })(window)</script><style type="text/css">header#page-header{background: none;} #page-header {background-image: none !important;} #page-header:before {opacity: 0;}</style><style type="text/css">body {cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/pointer.cur),default;}a,img {cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/pointer.cur), default;}</style><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/tx.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 媒体</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fab fa-youtube"></i><span> 番剧</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw far fa-image"></i><span> 相册</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/talk/"><i class="fa-fw far fa-comment"></i><span> 微语</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/banner/3.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">MyangingのBlog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 媒体</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fab fa-youtube"></i><span> 番剧</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw far fa-image"></i><span> 相册</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/talk/"><i class="fa-fw far fa-comment"></i><span> 微语</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">分布式事务</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-05-12T06:40:45.000Z" title="发表于 2021-05-12 14:40:45">2021-05-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-05-12T08:24:05.138Z" title="更新于 2021-05-12 16:24:05">2021-05-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="分布式事务"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="分布式事务产生的原因"><a href="#分布式事务产生的原因" class="headerlink" title="分布式事务产生的原因"></a>分布式事务产生的原因</h2><blockquote>
+<p>随着互联网高速发展，事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点 之上。简单的说，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用。在这种 环境中，我们之前说过数据库的 ACID 四大特性，已经无法满足我们分布式事务。 本质上来说，分布式事务就是为了保证不同数据库的数据一致性。</p>
+</blockquote>
+<h2 id="CAP-理论"><a href="#CAP-理论" class="headerlink" title="CAP 理论"></a>CAP 理论</h2><blockquote>
+<p> CAP 定理，又被叫作布鲁尔定理。</p>
+</blockquote>
+<blockquote>
+<p> CAP 指的是：一致性（Consistency）、可用性（Availability）、分区容错性（Partition tolerance）。</p>
+</blockquote>
+<blockquote>
+<p>  CAP 定律说的是，在一个分布式系统中，最多只能满足 C、A、P 中的两个，不可能三个同时满足。 而在分布式系统中，网络无法 100% 可靠，分区其实是一个必然现象。 如果我们选择了 CA 而放弃了 P，那么当发生分区现象时，为了保证一致性，这个时候必须拒绝请求，但是 A 又不允许，所以分布式系统理论上 不可能选择 CA 架构，只能选择 CP 或者 AP 架构。 </p>
+</blockquote>
+<blockquote>
+<p>  而且，显然，任何横向扩展策略都要依赖于数据分区。因此，设计人员必须在一致性与可用性之间做出选择。</p>
+</blockquote>
+<h2 id="BASE-理论"><a href="#BASE-理论" class="headerlink" title="BASE 理论"></a>BASE 理论</h2><blockquote>
+<p>往往在分布式系统中无法实现完全一致性，于是有了 BASE 理论，它是对 CAP 定律的进一步扩充 BASE 指的是：</p>
+<ul>
+<li> Basically Available（基本可用） ： 分布式系统在出现故障时，允许损失部分可用功能，保证核心功能可用</li>
+<li> Soft state（软状态） ： 允许系统中存在中间状态，这个状态不影响系统可用性</li>
+<li> Eventually consistent（最终一致性） ： 经过一段时间后，所有节点数据都将会达到一致 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p> BASE 理论是对 CAP 中的一致性和可用性进行一个权衡的结果<br> BASE 理论核心思想就是：我们无法做到强一致，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性 BASE 和 ACID 是相反的，它完全不同于 ACID 的强一致性模型，而是通过牺牲强一致性来获得可用性，并允许数据在一段时 间内是不一致的，但最终达到一致状态。</p>
+</blockquote>
+<h2 id="基于-XA-协议的两阶段提交-2pc的一种实现"><a href="#基于-XA-协议的两阶段提交-2pc的一种实现" class="headerlink" title="基于 XA 协议的两阶段提交(2pc的一种实现)"></a>基于 XA 协议的两阶段提交(2pc的一种实现)</h2><blockquote>
+<p>X/Open 组织提出了分布式事务的规范  —– XA 协议<br>XA 协议包含两部分：事务管理器和本地资源管理器。<br>其中本地资源管理器往往由数据库实现，目前主流的关系型数据库都实现了 XA 接口， 而事务管理器作为全局的调度者，负责各个本地资源的提交和回滚。<br>XA 的核心，便是全局事务，通过 XA 二阶段提交协议，与各分布式数据交互，分准备与提交两个阶段<br><img src="/other/XA%E5%8D%8F%E8%AE%AE.jpg"><br>在 XA 协议中事务分为两阶段：</p>
+<ul>
+<li>事务管理器要求每个涉及到事务的数据库预提交(precommit)此操作，并反映是否可以提交。 </li>
+<li>事务协调器要求每个数据库提交数据，或者回滚数据。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>  优点： </p>
+<ul>
+<li>尽量保证了数据的强一致，实现成本较低，在各大主流数据库都有自己实现，对于 MySQL 是从 5.5 开始支持。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>  缺点：</p>
+<ul>
+<li> <code>单点问题</code>：事务管理器在整个流程中扮演的角色很关键，如果其宕机，比如在第一阶段已经完成，在第二阶段正准备提交 的时候事务管理器宕机，资源管理器就会一直阻塞，导致数据库无法使用。 </li>
+<li>  <code>同步阻塞</code>：在准备就绪之后，资源管理器中的资源一直处于阻塞，直到提交完成，释放资源。  </li>
+<li>  <code>数据不一致</code>：两阶段提交协议虽然为分布式数据强一致性所设计，但仍然存在数据不一致性的可能。 比如在第二阶段中，假设协调者发出了事务 Commit 的通知，但是因为网络问题该通知仅被一部分参与者所收到并执行 了 Commit 操作，其余的参与者则因为没有收到通知一直处于阻塞状态，这时候就产生了数据的不一致性。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>两阶段提交方案锁定资源时间长，对性能影响很大，基本不适合解决微服务事务问题。</p>
+</blockquote>
+<h2 id="3PC-事务"><a href="#3PC-事务" class="headerlink" title="3PC 事务"></a>3PC 事务</h2><blockquote>
+<p>3PC，全称 “<code>three phase commit</code>”，是 2PC 的改进版，其将 2PC 的 “提交事务请求” 过程一分为二。<br>如下图所示<br><img src="/other/3pc.jpg"></p>
+</blockquote>
+<h3 id="第一个阶段：-CanCommit"><a href="#第一个阶段：-CanCommit" class="headerlink" title="第一个阶段： CanCommit"></a>第一个阶段： CanCommit</h3><blockquote>
+<ul>
+<li>1.<code>事务询问</code>：协调者向所有的参与者发送一个包含事务内容的 canCommit 请求，询问是否可以执行事务提交操作，并开始等待各参与者的响应。 </li>
+<li>2.<code>各参与者向协调者反馈事务询问的响应</code>：参与者接收来自协调者的 canCommit 请求，如果参与者认为自己可以顺利执行事务，就返回 Yes，否则反馈 No 响应。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p><code>这一阶段主要是确定分布式事务的参与者是否具备了完成 commit 的条件，并不会执行事务操作</code>。 </p>
+</blockquote>
+<h3 id="第二阶段：precommit"><a href="#第二阶段：precommit" class="headerlink" title="第二阶段：precommit"></a>第二阶段：precommit</h3><blockquote>
+<p>协调者在得到所有参与者的响应之后，会根据结果执行<code> 2 种</code>操作：<code>执行事务预提交</code>，或者<code>中断事务</code>。</p>
+</blockquote>
+<blockquote>
+<p>  <code>执行事务预提交</code>分为 <code>3 个步骤</code>： </p>
+<ul>
+<li> <code>发送预提交请求</code>：协调者向所有参与者节点发出 preCommit 的请求，并进入 prepared 状态。 </li>
+<li>  <code>事务预提交</code>：参与者受到 preCommit 请求后，会执行事务操作，对应 2PC 中的 “执行事务”，也会 Undo 和 Redo 信息记录到事务日 志中。 </li>
+<li><code>各参与者向协调者反馈事务执行的结果</code>：如果参与者成功执行了事务，就反馈 Ack 响应，同时等待指令：提交（commit） 或终止（abort）。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p> <code>中断事务</code>也分为 <code>2 个步骤</code>：</p>
+<ul>
+<li><code>发送中断请求</code>：协调者向所有参与者节点发出 abort 请求 。 </li>
+<li><code>中断事务</code>：参与者如果收到 abort 请求或者超时了，都会中断事务。</li>
+</ul>
+</blockquote>
+<h3 id="第三阶段：docommit"><a href="#第三阶段：docommit" class="headerlink" title="第三阶段：docommit"></a>第三阶段：docommit</h3><blockquote>
+<p> <code>执行提交</code></p>
+<ul>
+<li> <code>发送提交请求</code>：进入这一阶段，如果协调者正常工作，并且接收到了所有协调者的 Ack 响应，那么协调者将从 “预提交” 状态变为 “提 交” 状态，并向所有的参与者发送 doCommit 请求 。 </li>
+<li> <code>事务提交</code>：参与者收到 doCommit 请求后，会正式执行事务提交操作，并在完成之后释放在整个事务执行期间占用的事务资源。 </li>
+<li><code>反馈事务提交结果</code>：参与者完成事务提交后，向协调者发送 Ack 消息。 </li>
+<li><code>完成事务</code>：协调者接收到所有参与者反馈的 Ack 消息后，完成事务。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p> <code>中断事务</code>（假设有任何参与者反馈了 no 响应，或者超时了，就中断事务）。 </p>
+<ul>
+<li> <code>发送中断请求</code>：协调者向所有的参与者节点发送 abort 请求。 </li>
+<li> <code>事务回滚</code>：参与者接收到 abort 请求后，会利用其在<code>二阶段</code>记录的 <code>undo 信息来执行事务回滚操作</code>，并在完成回滚之后释放整个事务执行 期间占用的资源。 </li>
+<li><code>反馈事务回滚结果</code>：参与者在完成事务回滚之后，想协调者发送 Ack 消息。 </li>
+<li> <code>中断事务</code>：协调者接收到所有的 Ack 消息后，中断事务。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>与 2pc 的区别<br>注意：<br>在阶段三，可能会出现 <code>2 种故障</code>：</p>
+<ul>
+<li>协调者出现问题/协调者和参与者之间的网络故障 一旦出现了任一一种情况，最终都会导致参与者无法收到 doCommit 请求或者 abort 请求， </li>
+<li>针对这种情况，参与者都会在等待超时之后，继续进行事务提交。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p> 优点：<br> 相比较 2PC，最大的优点是减少了参与者的阻塞范围（第一个阶段是不阻塞的）， 并且能够在单点故障后继续达成一致（2PC 在提交阶段会出现此问题，而 3PC 会根据协调者的状态进行回滚或者提交）。 </p>
+</blockquote>
+<blockquote>
+<p> 缺点：<br> 如果参与者收到了<code>preCommit</code> 消息后，出现了网络分区，那么参与者等待超时后，都会进行事务的提交，这必然会出现事务不一致的问题</p>
+</blockquote>
+<h2 id="TCC-方案"><a href="#TCC-方案" class="headerlink" title="TCC 方案"></a>TCC 方案</h2><blockquote>
+<p>TCC 其实就是采用的补偿机制，其核心思想是：针对每个操作，都要注册一个与其业务逻辑对应的确认和补偿（撤销）操作。 其<code>将整个业务逻辑的每个分支显式的分成了 Try、Confirm、Cancel 三个操作</code>。Try 部分完成业务的准备工作，confirm 部分完成业务的提交，cancel 部分完成事务的回滚。 </p>
+</blockquote>
+<blockquote>
+<p> 优点：<br> 跟 2PC 比起来，实现以及流程相对简单了一些，但数据的一致性比 2PC 也要差一些</p>
+</blockquote>
+<blockquote>
+<p> 缺点：<br> TCC 属于应用层的一种补偿方式，所以需要程序员在实现的时候多写很多补偿的代码，而且补偿的时候也有可能失败，在一些场景中，一些 业务流程可能用 TCC 不太好定义及处理。</p>
+</blockquote>
+<h2 id="Lcn-事务"><a href="#Lcn-事务" class="headerlink" title="Lcn 事务"></a>Lcn 事务</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>LCN 名称是由早期版本的 LCN 框架命名，在设计框架之初的 1.0 ~ 2.0 的版本时框架设计的步骤是如下,各取其首字母得来的 LCN 命名。</p>
+<ul>
+<li> 锁定事务单元（lock）</li>
+<li> 确认事务模块状态(confirm)</li>
+<li> 通知事务(notify)</li>
+</ul>
+</blockquote>
+<h3 id="框架定位"><a href="#框架定位" class="headerlink" title="框架定位"></a>框架定位</h3><blockquote>
+<p>LCN 并不生产事务，LCN 只是本地事务的协调工<br>TX-LCN 定位于一款事务协调性框架，框架其本身并不操作事务，而是基于对事务的协调从而达到事务一致性的效果。 </p>
+</blockquote>
+<h3 id="事务控制原理"><a href="#事务控制原理" class="headerlink" title="事务控制原理"></a>事务控制原理</h3><blockquote>
+<p>TX-LCN 由两大模块组成, TxClient、TxManager， TxClient 作为模块的依赖框架，提供 TX-LCN 的标准支持，TxManager 作为分布式事务的控制方。事务发起方或者参与反都由 TxClient 端来控制。</p>
+<ul>
+<li><code>创建事务组</code>：是指在事务发起方开始执行业务代码之前先调用 TxManager 创建事务组对象，然后拿到事务标示 GroupId 的过程。 </li>
+<li><code>加入事务组</code>： 添加事务组是指参与方在执行完业务方法以后，将该模块的事务信息通知给 TxManager 的操作。 </li>
+<li><code>通知事务组</code>：是指在发起方执行完业务代码以后，将发起方执行结果状态通知给 TxManager,TxManager 将根据事务最终状态和事务组的信息 来通知相应的参与模块提交或回滚事务，并返回结果给事务发起方。</li>
+</ul>
+</blockquote>
+<h2 id="Seata事务"><a href="#Seata事务" class="headerlink" title="Seata事务"></a>Seata事务</h2><h3 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>Seata(Simple Extensible Autonomous Transaction Architecture) 是 阿里巴巴开源的分布式事务中间件，以高效并且对业 务 0 侵入的方式，解决微服务场景下面临的分布式事务问题。</p>
+</blockquote>
+<h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><blockquote>
+<p>seata 的 AT 模式，采用的是大量运用在数据库软件的 Write Ahead Log 思想，即把事务的信息以事务日志的方式记录下来。 这种处理方式，实际上是对传统两阶段提交的一种改进和优化。主要有几个关键点： </p>
+<ul>
+<li>传统两阶段提交协议是阻塞协议，性能差 </li>
+<li>传统两阶段提交协议高可用性不好 </li>
+<li>传统两阶段提交协议的全局事务隔离机制不支持 </li>
+<li>根据八二原则，80% 的涉及到全局事务的业务是能正常完成并提交的。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p>因此，在 AT 模式下，seata 采取的做法是，一个事务分支的数据库操作执行完后，马上进行本地事务的提交，从而释放相关的数据库 资源。</p>
+</blockquote>
+<ul>
+<li>分支事务中数据的 <code>本地锁</code> 由本地事务管理，在分支事务 Phase1 结束时释放。 </li>
+<li>同时，随着本地事务结束，<code>连接</code> 也得以释放。 </li>
+<li>分支事务中数据的 <code>全局锁</code> 在事务协调器侧管理，在决议 Phase2 全局提交时，全局锁马上可以释放。只有在决议全 局回滚的情况下，<code>全局锁</code> 才被持有至分支的 Phase2 结束。</li>
+</ul>
+<h3 id="本地事务执行流程"><a href="#本地事务执行流程" class="headerlink" title="本地事务执行流程"></a>本地事务执行流程</h3><blockquote>
+<p>在进行本地提交的前提是，seata 会解析 SQL，获取数据库表的元数据，根绝 SQL 类型，选择性地生成数据的前置镜像和后置镜像， 保存在 undo_log 表中，并且要求与保存 undo_log 与业务 SQL 在同一个本地事务内。<br> 这就保证了：</p>
+<ul>
+<li> 如果一个本地事务被提交，那么必定对应着相应的 undo_log</li>
+<li> 如果保存 undo_log 保存失败，那么业务 SQL 也会失败</li>
+</ul>
+</blockquote>
+<h3 id="全局事务提交流程"><a href="#全局事务提交流程" class="headerlink" title="全局事务提交流程"></a>全局事务提交流程</h3><blockquote>
+<p>因为每个分支事务的本地事务都已经被提交，所以如果全局事务能够顺利进行到“提交“这一阶段，那么意味着所有事务分支的本地事 务都已经被提交了，数据的一致性已经得到了保证。<br>这个时候全局事务的提交就变得十分轻量级，就是把 undo_log 对应的记录删掉即可，即使是当时删除失败了，也已经不会影响全局事 务的最终结果，这次删不了，那就待会再删，程序删不了，没事，顶多人工删。</p>
+</blockquote>
+<h3 id="全局事务回滚流程"><a href="#全局事务回滚流程" class="headerlink" title="全局事务回滚流程"></a>全局事务回滚流程</h3><blockquote>
+<p>如果全局事务的任何一个事务分支失败了，那么全局事务就进入“回滚“流程，回滚时依据先前保存好数据镜像，将原来的数据回放回 去。<br>如果全局回放成功，那么数据的一致性也就得到了保证，如果回退不成功，那么事务就进入异常。应对异常，可能需要重试，可能需要 人工介入。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Myanging</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://myanging.github.io/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">https://myanging.github.io/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://myanging.github.io" target="_blank">MyangingのBlog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a><a class="post-meta__tags" href="/tags/base%E7%90%86%E8%AE%BA/">base理论</a><a class="post-meta__tags" href="/tags/cap%E7%90%86%E8%AE%BA/">cap理论</a><a class="post-meta__tags" href="/tags/2pc/">2pc</a><a class="post-meta__tags" href="/tags/3pc/">3pc</a><a class="post-meta__tags" href="/tags/XA%E5%8D%8F%E8%AE%AE/">XA协议</a></div><div class="post_share"><div class="social-share" data-image="/banner/3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/05/12/spring%E7%94%9C%E7%82%B9/"><img class="next-cover" src="/banner/6.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">spring甜点</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/tx.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Myanging</div><div class="author-info__description">爱生活，爱美女，爱游戏</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/myanging"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/myanging" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:568358827@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客庄园，以后一起学习，一起进步! <img class="entered loading" style="width:100%;" src="/img/tx.png" data-ll-status="loading"></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%BA%A7%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">1.</span> <span class="toc-text">分布式事务产生的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAP-%E7%90%86%E8%AE%BA"><span class="toc-number">2.</span> <span class="toc-text">CAP 理论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BASE-%E7%90%86%E8%AE%BA"><span class="toc-number">3.</span> <span class="toc-text">BASE 理论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-XA-%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4-2pc%E7%9A%84%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">基于 XA 协议的两阶段提交(2pc的一种实现)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3PC-%E4%BA%8B%E5%8A%A1"><span class="toc-number">5.</span> <span class="toc-text">3PC 事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%98%B6%E6%AE%B5%EF%BC%9A-CanCommit"><span class="toc-number">5.1.</span> <span class="toc-text">第一个阶段： CanCommit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9Aprecommit"><span class="toc-number">5.2.</span> <span class="toc-text">第二阶段：precommit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5%EF%BC%9Adocommit"><span class="toc-number">5.3.</span> <span class="toc-text">第三阶段：docommit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCC-%E6%96%B9%E6%A1%88"><span class="toc-number">6.</span> <span class="toc-text">TCC 方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lcn-%E4%BA%8B%E5%8A%A1"><span class="toc-number">7.</span> <span class="toc-text">Lcn 事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">7.1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%86%E6%9E%B6%E5%AE%9A%E4%BD%8D"><span class="toc-number">7.2.</span> <span class="toc-text">框架定位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6%E5%8E%9F%E7%90%86"><span class="toc-number">7.3.</span> <span class="toc-text">事务控制原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Seata%E4%BA%8B%E5%8A%A1"><span class="toc-number">8.</span> <span class="toc-text">Seata事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF-1"><span class="toc-number">8.1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="toc-number">8.2.</span> <span class="toc-text">设计思想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">8.3.</span> <span class="toc-text">本地事务执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4%E6%B5%81%E7%A8%8B"><span class="toc-number">8.4.</span> <span class="toc-text">全局事务提交流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E4%BA%8B%E5%8A%A1%E5%9B%9E%E6%BB%9A%E6%B5%81%E7%A8%8B"><span class="toc-number">8.5.</span> <span class="toc-text">全局事务回滚流程</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务"><img src="/banner/3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="分布式事务"/></a><div class="content"><a class="title" href="/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务">分布式事务</a><time datetime="2021-05-12T06:40:45.000Z" title="发表于 2021-05-12 14:40:45">2021-05-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/12/spring%E7%94%9C%E7%82%B9/" title="spring甜点"><img src="/banner/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="spring甜点"/></a><div class="content"><a class="title" href="/2021/05/12/spring%E7%94%9C%E7%82%B9/" title="spring甜点">spring甜点</a><time datetime="2021-05-12T05:48:33.000Z" title="发表于 2021-05-12 13:48:33">2021-05-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/12/eureka/" title="eureka"><img src="/banner/7.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="eureka"/></a><div class="content"><a class="title" href="/2021/05/12/eureka/" title="eureka">eureka</a><time datetime="2021-05-12T01:29:01.000Z" title="发表于 2021-05-12 09:29:01">2021-05-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/11/spring/" title="spring的源码解读一"><img src="/banner/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="spring的源码解读一"/></a><div class="content"><a class="title" href="/2021/05/11/spring/" title="spring的源码解读一">spring的源码解读一</a><time datetime="2021-05-11T06:56:51.000Z" title="发表于 2021-05-11 14:56:51">2021-05-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/11/spring%E5%AD%A6%E4%B9%A0/" title="spring源码学习"><img src="/banner/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="spring源码学习"/></a><div class="content"><a class="title" href="/2021/05/11/spring%E5%AD%A6%E4%B9%A0/" title="spring源码学习">spring源码学习</a><time datetime="2021-05-11T02:45:27.000Z" title="发表于 2021-05-11 10:45:27">2021-05-11</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 <i id="heartbeat" class="fa fas fa-heartbeat" style="color:red;" ></i> Myanging</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'AlJN9ut5f0VsOpj3IjQsVuhf-MdYXbMMI',
+      appKey: 'cW0mYP5HWIojU7c6gn9UA6sw',
+      placeholder: 'Please leave your footprints',
+      avatar: 'mp',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-show-text.min.js" data-mobile="false" data-text="I,LOVE,YOU" data-fontsize="15px" data-random="false" async="async"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -171,6 +171,194 @@
       </tags>
   </entry>
   <entry>
+    <title>分布式事务</title>
+    <url>/2021/05/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/</url>
+    <content><![CDATA[<h2 id="分布式事务产生的原因"><a href="#分布式事务产生的原因" class="headerlink" title="分布式事务产生的原因"></a>分布式事务产生的原因</h2><blockquote>
+<p>随着互联网高速发展，事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点 之上。简单的说，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用。在这种 环境中，我们之前说过数据库的 ACID 四大特性，已经无法满足我们分布式事务。 本质上来说，分布式事务就是为了保证不同数据库的数据一致性。</p>
+</blockquote>
+<h2 id="CAP-理论"><a href="#CAP-理论" class="headerlink" title="CAP 理论"></a>CAP 理论</h2><blockquote>
+<p> CAP 定理，又被叫作布鲁尔定理。</p>
+</blockquote>
+<blockquote>
+<p> CAP 指的是：一致性（Consistency）、可用性（Availability）、分区容错性（Partition tolerance）。</p>
+</blockquote>
+<blockquote>
+<p>  CAP 定律说的是，在一个分布式系统中，最多只能满足 C、A、P 中的两个，不可能三个同时满足。 而在分布式系统中，网络无法 100% 可靠，分区其实是一个必然现象。 如果我们选择了 CA 而放弃了 P，那么当发生分区现象时，为了保证一致性，这个时候必须拒绝请求，但是 A 又不允许，所以分布式系统理论上 不可能选择 CA 架构，只能选择 CP 或者 AP 架构。 </p>
+</blockquote>
+<blockquote>
+<p>  而且，显然，任何横向扩展策略都要依赖于数据分区。因此，设计人员必须在一致性与可用性之间做出选择。</p>
+</blockquote>
+<h2 id="BASE-理论"><a href="#BASE-理论" class="headerlink" title="BASE 理论"></a>BASE 理论</h2><blockquote>
+<p>往往在分布式系统中无法实现完全一致性，于是有了 BASE 理论，它是对 CAP 定律的进一步扩充 BASE 指的是：</p>
+<ul>
+<li> Basically Available（基本可用） ： 分布式系统在出现故障时，允许损失部分可用功能，保证核心功能可用</li>
+<li> Soft state（软状态） ： 允许系统中存在中间状态，这个状态不影响系统可用性</li>
+<li> Eventually consistent（最终一致性） ： 经过一段时间后，所有节点数据都将会达到一致 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p> BASE 理论是对 CAP 中的一致性和可用性进行一个权衡的结果<br> BASE 理论核心思想就是：我们无法做到强一致，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性 BASE 和 ACID 是相反的，它完全不同于 ACID 的强一致性模型，而是通过牺牲强一致性来获得可用性，并允许数据在一段时 间内是不一致的，但最终达到一致状态。</p>
+</blockquote>
+<h2 id="基于-XA-协议的两阶段提交-2pc的一种实现"><a href="#基于-XA-协议的两阶段提交-2pc的一种实现" class="headerlink" title="基于 XA 协议的两阶段提交(2pc的一种实现)"></a>基于 XA 协议的两阶段提交(2pc的一种实现)</h2><blockquote>
+<p>X/Open 组织提出了分布式事务的规范  —– XA 协议<br>XA 协议包含两部分：事务管理器和本地资源管理器。<br>其中本地资源管理器往往由数据库实现，目前主流的关系型数据库都实现了 XA 接口， 而事务管理器作为全局的调度者，负责各个本地资源的提交和回滚。<br>XA 的核心，便是全局事务，通过 XA 二阶段提交协议，与各分布式数据交互，分准备与提交两个阶段<br><img src="/other/XA%E5%8D%8F%E8%AE%AE.jpg"><br>在 XA 协议中事务分为两阶段：</p>
+<ul>
+<li>事务管理器要求每个涉及到事务的数据库预提交(precommit)此操作，并反映是否可以提交。 </li>
+<li>事务协调器要求每个数据库提交数据，或者回滚数据。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>  优点： </p>
+<ul>
+<li>尽量保证了数据的强一致，实现成本较低，在各大主流数据库都有自己实现，对于 MySQL 是从 5.5 开始支持。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>  缺点：</p>
+<ul>
+<li> <code>单点问题</code>：事务管理器在整个流程中扮演的角色很关键，如果其宕机，比如在第一阶段已经完成，在第二阶段正准备提交 的时候事务管理器宕机，资源管理器就会一直阻塞，导致数据库无法使用。 </li>
+<li>  <code>同步阻塞</code>：在准备就绪之后，资源管理器中的资源一直处于阻塞，直到提交完成，释放资源。  </li>
+<li>  <code>数据不一致</code>：两阶段提交协议虽然为分布式数据强一致性所设计，但仍然存在数据不一致性的可能。 比如在第二阶段中，假设协调者发出了事务 Commit 的通知，但是因为网络问题该通知仅被一部分参与者所收到并执行 了 Commit 操作，其余的参与者则因为没有收到通知一直处于阻塞状态，这时候就产生了数据的不一致性。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>两阶段提交方案锁定资源时间长，对性能影响很大，基本不适合解决微服务事务问题。</p>
+</blockquote>
+<h2 id="3PC-事务"><a href="#3PC-事务" class="headerlink" title="3PC 事务"></a>3PC 事务</h2><blockquote>
+<p>3PC，全称 “<code>three phase commit</code>”，是 2PC 的改进版，其将 2PC 的 “提交事务请求” 过程一分为二。<br>如下图所示<br><img src="/other/3pc.jpg"></p>
+</blockquote>
+<h3 id="第一个阶段：-CanCommit"><a href="#第一个阶段：-CanCommit" class="headerlink" title="第一个阶段： CanCommit"></a>第一个阶段： CanCommit</h3><blockquote>
+<ul>
+<li>1.<code>事务询问</code>：协调者向所有的参与者发送一个包含事务内容的 canCommit 请求，询问是否可以执行事务提交操作，并开始等待各参与者的响应。 </li>
+<li>2.<code>各参与者向协调者反馈事务询问的响应</code>：参与者接收来自协调者的 canCommit 请求，如果参与者认为自己可以顺利执行事务，就返回 Yes，否则反馈 No 响应。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p><code>这一阶段主要是确定分布式事务的参与者是否具备了完成 commit 的条件，并不会执行事务操作</code>。 </p>
+</blockquote>
+<h3 id="第二阶段：precommit"><a href="#第二阶段：precommit" class="headerlink" title="第二阶段：precommit"></a>第二阶段：precommit</h3><blockquote>
+<p>协调者在得到所有参与者的响应之后，会根据结果执行<code> 2 种</code>操作：<code>执行事务预提交</code>，或者<code>中断事务</code>。</p>
+</blockquote>
+<blockquote>
+<p>  <code>执行事务预提交</code>分为 <code>3 个步骤</code>： </p>
+<ul>
+<li> <code>发送预提交请求</code>：协调者向所有参与者节点发出 preCommit 的请求，并进入 prepared 状态。 </li>
+<li>  <code>事务预提交</code>：参与者受到 preCommit 请求后，会执行事务操作，对应 2PC 中的 “执行事务”，也会 Undo 和 Redo 信息记录到事务日 志中。 </li>
+<li><code>各参与者向协调者反馈事务执行的结果</code>：如果参与者成功执行了事务，就反馈 Ack 响应，同时等待指令：提交（commit） 或终止（abort）。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p> <code>中断事务</code>也分为 <code>2 个步骤</code>：</p>
+<ul>
+<li><code>发送中断请求</code>：协调者向所有参与者节点发出 abort 请求 。 </li>
+<li><code>中断事务</code>：参与者如果收到 abort 请求或者超时了，都会中断事务。</li>
+</ul>
+</blockquote>
+<h3 id="第三阶段：docommit"><a href="#第三阶段：docommit" class="headerlink" title="第三阶段：docommit"></a>第三阶段：docommit</h3><blockquote>
+<p> <code>执行提交</code></p>
+<ul>
+<li> <code>发送提交请求</code>：进入这一阶段，如果协调者正常工作，并且接收到了所有协调者的 Ack 响应，那么协调者将从 “预提交” 状态变为 “提 交” 状态，并向所有的参与者发送 doCommit 请求 。 </li>
+<li> <code>事务提交</code>：参与者收到 doCommit 请求后，会正式执行事务提交操作，并在完成之后释放在整个事务执行期间占用的事务资源。 </li>
+<li><code>反馈事务提交结果</code>：参与者完成事务提交后，向协调者发送 Ack 消息。 </li>
+<li><code>完成事务</code>：协调者接收到所有参与者反馈的 Ack 消息后，完成事务。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p> <code>中断事务</code>（假设有任何参与者反馈了 no 响应，或者超时了，就中断事务）。 </p>
+<ul>
+<li> <code>发送中断请求</code>：协调者向所有的参与者节点发送 abort 请求。 </li>
+<li> <code>事务回滚</code>：参与者接收到 abort 请求后，会利用其在<code>二阶段</code>记录的 <code>undo 信息来执行事务回滚操作</code>，并在完成回滚之后释放整个事务执行 期间占用的资源。 </li>
+<li><code>反馈事务回滚结果</code>：参与者在完成事务回滚之后，想协调者发送 Ack 消息。 </li>
+<li> <code>中断事务</code>：协调者接收到所有的 Ack 消息后，中断事务。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>与 2pc 的区别<br>注意：<br>在阶段三，可能会出现 <code>2 种故障</code>：</p>
+<ul>
+<li>协调者出现问题/协调者和参与者之间的网络故障 一旦出现了任一一种情况，最终都会导致参与者无法收到 doCommit 请求或者 abort 请求， </li>
+<li>针对这种情况，参与者都会在等待超时之后，继续进行事务提交。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p> 优点：<br> 相比较 2PC，最大的优点是减少了参与者的阻塞范围（第一个阶段是不阻塞的）， 并且能够在单点故障后继续达成一致（2PC 在提交阶段会出现此问题，而 3PC 会根据协调者的状态进行回滚或者提交）。 </p>
+</blockquote>
+<blockquote>
+<p> 缺点：<br> 如果参与者收到了<code>preCommit</code> 消息后，出现了网络分区，那么参与者等待超时后，都会进行事务的提交，这必然会出现事务不一致的问题</p>
+</blockquote>
+<h2 id="TCC-方案"><a href="#TCC-方案" class="headerlink" title="TCC 方案"></a>TCC 方案</h2><blockquote>
+<p>TCC 其实就是采用的补偿机制，其核心思想是：针对每个操作，都要注册一个与其业务逻辑对应的确认和补偿（撤销）操作。 其<code>将整个业务逻辑的每个分支显式的分成了 Try、Confirm、Cancel 三个操作</code>。Try 部分完成业务的准备工作，confirm 部分完成业务的提交，cancel 部分完成事务的回滚。 </p>
+</blockquote>
+<blockquote>
+<p> 优点：<br> 跟 2PC 比起来，实现以及流程相对简单了一些，但数据的一致性比 2PC 也要差一些</p>
+</blockquote>
+<blockquote>
+<p> 缺点：<br> TCC 属于应用层的一种补偿方式，所以需要程序员在实现的时候多写很多补偿的代码，而且补偿的时候也有可能失败，在一些场景中，一些 业务流程可能用 TCC 不太好定义及处理。</p>
+</blockquote>
+<h2 id="Lcn-事务"><a href="#Lcn-事务" class="headerlink" title="Lcn 事务"></a>Lcn 事务</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>LCN 名称是由早期版本的 LCN 框架命名，在设计框架之初的 1.0 ~ 2.0 的版本时框架设计的步骤是如下,各取其首字母得来的 LCN 命名。</p>
+<ul>
+<li> 锁定事务单元（lock）</li>
+<li> 确认事务模块状态(confirm)</li>
+<li> 通知事务(notify)</li>
+</ul>
+</blockquote>
+<h3 id="框架定位"><a href="#框架定位" class="headerlink" title="框架定位"></a>框架定位</h3><blockquote>
+<p>LCN 并不生产事务，LCN 只是本地事务的协调工<br>TX-LCN 定位于一款事务协调性框架，框架其本身并不操作事务，而是基于对事务的协调从而达到事务一致性的效果。 </p>
+</blockquote>
+<h3 id="事务控制原理"><a href="#事务控制原理" class="headerlink" title="事务控制原理"></a>事务控制原理</h3><blockquote>
+<p>TX-LCN 由两大模块组成, TxClient、TxManager， TxClient 作为模块的依赖框架，提供 TX-LCN 的标准支持，TxManager 作为分布式事务的控制方。事务发起方或者参与反都由 TxClient 端来控制。</p>
+<ul>
+<li><code>创建事务组</code>：是指在事务发起方开始执行业务代码之前先调用 TxManager 创建事务组对象，然后拿到事务标示 GroupId 的过程。 </li>
+<li><code>加入事务组</code>： 添加事务组是指参与方在执行完业务方法以后，将该模块的事务信息通知给 TxManager 的操作。 </li>
+<li><code>通知事务组</code>：是指在发起方执行完业务代码以后，将发起方执行结果状态通知给 TxManager,TxManager 将根据事务最终状态和事务组的信息 来通知相应的参与模块提交或回滚事务，并返回结果给事务发起方。</li>
+</ul>
+</blockquote>
+<h2 id="Seata事务"><a href="#Seata事务" class="headerlink" title="Seata事务"></a>Seata事务</h2><h3 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>Seata(Simple Extensible Autonomous Transaction Architecture) 是 阿里巴巴开源的分布式事务中间件，以高效并且对业 务 0 侵入的方式，解决微服务场景下面临的分布式事务问题。</p>
+</blockquote>
+<h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><blockquote>
+<p>seata 的 AT 模式，采用的是大量运用在数据库软件的 Write Ahead Log 思想，即把事务的信息以事务日志的方式记录下来。 这种处理方式，实际上是对传统两阶段提交的一种改进和优化。主要有几个关键点： </p>
+<ul>
+<li>传统两阶段提交协议是阻塞协议，性能差 </li>
+<li>传统两阶段提交协议高可用性不好 </li>
+<li>传统两阶段提交协议的全局事务隔离机制不支持 </li>
+<li>根据八二原则，80% 的涉及到全局事务的业务是能正常完成并提交的。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p>因此，在 AT 模式下，seata 采取的做法是，一个事务分支的数据库操作执行完后，马上进行本地事务的提交，从而释放相关的数据库 资源。</p>
+</blockquote>
+<ul>
+<li>分支事务中数据的 <code>本地锁</code> 由本地事务管理，在分支事务 Phase1 结束时释放。 </li>
+<li>同时，随着本地事务结束，<code>连接</code> 也得以释放。 </li>
+<li>分支事务中数据的 <code>全局锁</code> 在事务协调器侧管理，在决议 Phase2 全局提交时，全局锁马上可以释放。只有在决议全 局回滚的情况下，<code>全局锁</code> 才被持有至分支的 Phase2 结束。</li>
+</ul>
+<h3 id="本地事务执行流程"><a href="#本地事务执行流程" class="headerlink" title="本地事务执行流程"></a>本地事务执行流程</h3><blockquote>
+<p>在进行本地提交的前提是，seata 会解析 SQL，获取数据库表的元数据，根绝 SQL 类型，选择性地生成数据的前置镜像和后置镜像， 保存在 undo_log 表中，并且要求与保存 undo_log 与业务 SQL 在同一个本地事务内。<br> 这就保证了：</p>
+<ul>
+<li> 如果一个本地事务被提交，那么必定对应着相应的 undo_log</li>
+<li> 如果保存 undo_log 保存失败，那么业务 SQL 也会失败</li>
+</ul>
+</blockquote>
+<h3 id="全局事务提交流程"><a href="#全局事务提交流程" class="headerlink" title="全局事务提交流程"></a>全局事务提交流程</h3><blockquote>
+<p>因为每个分支事务的本地事务都已经被提交，所以如果全局事务能够顺利进行到“提交“这一阶段，那么意味着所有事务分支的本地事 务都已经被提交了，数据的一致性已经得到了保证。<br>这个时候全局事务的提交就变得十分轻量级，就是把 undo_log 对应的记录删掉即可，即使是当时删除失败了，也已经不会影响全局事 务的最终结果，这次删不了，那就待会再删，程序删不了，没事，顶多人工删。</p>
+</blockquote>
+<h3 id="全局事务回滚流程"><a href="#全局事务回滚流程" class="headerlink" title="全局事务回滚流程"></a>全局事务回滚流程</h3><blockquote>
+<p>如果全局事务的任何一个事务分支失败了，那么全局事务就进入“回滚“流程，回滚时依据先前保存好数据镜像，将原来的数据回放回 去。<br>如果全局回放成功，那么数据的一致性也就得到了保证，如果回退不成功，那么事务就进入异常。应对异常，可能需要重试，可能需要 人工介入。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>分布式事务</category>
+      </categories>
+      <tags>
+        <tag>分布式事务</tag>
+        <tag>base理论</tag>
+        <tag>cap理论</tag>
+        <tag>2pc</tag>
+        <tag>3pc</tag>
+        <tag>XA协议</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>算法</title>
     <url>/2021/05/11/%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h1 id="目前收录10种排序算法"><a href="#目前收录10种排序算法" class="headerlink" title="目前收录10种排序算法"></a>目前收录10种排序算法</h1><h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] sort(<span class="keyword">int</span>[] array) &#123;</span><br><span class="line">        <span class="keyword">if</span> (array.length == <span class="number">0</span>)&#123;</span><br><span class="line">			<span class="keyword">return</span> array;</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">/*循环数组长度的次数*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++)&#123;</span><br><span class="line">            <span class="comment">/*从第0个元素开始，依次和后面的元素进行比较*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; array.length; j++)&#123;</span><br><span class="line">                <span class="comment">/*如果第j个元素比后面的第j+1元素大，交换两者的位置*/</span></span><br><span class="line">                <span class="keyword">if</span> (array[j + <span class="number">1</span>] &lt; array[j]) &#123;</span><br><span class="line">                    <span class="keyword">int</span> temp = array[j + <span class="number">1</span>];</span><br><span class="line">                    array[j + <span class="number">1</span>] = array[j];</span><br><span class="line">                    array[j] = temp;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> array;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
