@@ -33,6 +33,38 @@
       </tags>
   </entry>
   <entry>
+    <title>gitSsh</title>
+    <url>/2021/05/12/gitSsh/</url>
+    <content><![CDATA[<h2 id="git-ssh免密"><a href="#git-ssh免密" class="headerlink" title="git ssh免密"></a>git ssh免密</h2><blockquote>
+<p>获取相关信息</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git config --global  --list</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如未配置，则执行以下命令进行配置：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git config --global  user.name &quot;这里换上你的用户名&quot;</span><br><span class="line">git config --global user.email &quot;这里换上你的邮箱&quot;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>然后执行以下命令生成秘钥：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa -C &quot;这里换上你的邮箱&quot;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>执行命令，直接4次回车键就OK了<br><img src="/other/git.jpg"><br>找到红框文件，copy</p>
+</blockquote>
+<blockquote>
+<p>然后登录你的github，按照以下流程执行<br><img src="/other/git2.jpg"><br><img src="/other/git3.jpg"><br><img src="/other/git4.jpg"><br><img src="/other/git5.jpg"></p>
+</blockquote>
+<blockquote>
+<p>上面执行完后，使用方式是<br><img src="/other/git6.jpg"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2021/05/10/hello-world/</url>
     <content><![CDATA[<h1 id="样式1"><a href="#样式1" class="headerlink" title="样式1"></a>样式1</h1><div class="tabs" id="方法"><ul class="nav-tabs"><li class="tab"><button type="button" data-href="#方法-1">方法 1</button></li><li class="tab"><button type="button" data-href="#方法-2">方法 2</button></li><li class="tab active"><button type="button" data-href="#方法-3">方法 3</button></li></ul><div class="tab-contents"><div class="tab-item-content" id="方法-1"><p><strong>This is Tab 1.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="方法-2"><p><strong>This is Tab 2.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content active" id="方法-3"><p><strong>This is Tab 3.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div>
