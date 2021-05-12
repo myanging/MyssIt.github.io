@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>eureka</title>
+    <url>/2021/05/12/eureka/</url>
+    <content><![CDATA[<h3 id="eureka多级缓存架构"><a href="#eureka多级缓存架构" class="headerlink" title="eureka多级缓存架构"></a>eureka多级缓存架构</h3><blockquote>
+<p>  eureka Server为了避免同时读写内存数据结构造成的并发冲突问题，还采用了多级缓存机制进一步提升服务请求的响应速度。</p>
+</blockquote>
+<blockquote>
+<p>  一级缓存:<br>   本质上是HashMap，无过期时间，保存服务信息的对外输出数据机构。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ConcurrentHashMap&lt;Key,Value&gt; readOnlyCacheMap;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>二级缓存：<br>本质上是guava的缓存，包含失效的机制，保存服务信息的对外输出数据结构</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Loading&lt;Key,Value&gt; readWriteCacheMap;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在拉取服务的过程中首先在readOnlyCacheMap里查缓存的注册表。如果没有，就找readWriteCacheMap里缓存的注册表。如果没有，就从内存中获取实际的注册表数据。</p>
+</blockquote>
+<blockquote>
+<p>多级缓存机制优点是什么？<br>尽可能保证了内存注册表数据不会频繁的读写冲突问题，并且进一步保证对Eureka Server的大量请求，都是快速从纯内存走，性能极高。</p>
+</blockquote>
+<blockquote>
+<p>在注册表发生变更的时候：会在内存中更新变更的注册表数据。同时过期掉readWriteCacheMap。此过程不会影响readOnlyCacheMap，一段时间内默认是30s，各服务拉取注册表会直接读readOnlyCacheMap，30s过后，EurekaServer的后台线程发现readWriteCacheMap已经清空了，也会清空readOnlyCacheMap中的缓存，下次有服务拉去注册表，又会从内存中获取最新的数据了，同时填充各个缓存。<br><img src="/eureka/eureka%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98.png"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>eureka</category>
+      </categories>
+      <tags>
+        <tag>eureka</tag>
+        <tag>eureka杂谈</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2021/05/10/hello-world/</url>
     <content><![CDATA[<h1 id="样式1"><a href="#样式1" class="headerlink" title="样式1"></a>样式1</h1><div class="tabs" id="方法"><ul class="nav-tabs"><li class="tab"><button type="button" data-href="#方法-1">方法 1</button></li><li class="tab"><button type="button" data-href="#方法-2">方法 2</button></li><li class="tab active"><button type="button" data-href="#方法-3">方法 3</button></li></ul><div class="tab-contents"><div class="tab-item-content" id="方法-1"><p><strong>This is Tab 1.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="方法-2"><p><strong>This is Tab 2.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content active" id="方法-3"><p><strong>This is Tab 3.</strong></p><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div>
@@ -127,6 +159,18 @@
       </tags>
   </entry>
   <entry>
+    <title>spring甜点</title>
+    <url>/2021/05/12/spring%E7%94%9C%E7%82%B9/</url>
+    <content><![CDATA[<h1 id="主要记录spring一些小技巧"><a href="#主要记录spring一些小技巧" class="headerlink" title="主要记录spring一些小技巧"></a>主要记录spring一些小技巧</h1><h2 id="怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal"><a href="#怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal" class="headerlink" title="怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal"></a>怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span><br><span class="line">HttpServletRequest request = requestAttributes.getRequest();</span><br><span class="line">HttpServletResponse response = requestAttributes.getResponse();</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>spring</category>
+      </categories>
+      <tags>
+        <tag>spring</tag>
+        <tag>spring甜点</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>算法</title>
     <url>/2021/05/11/%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h1 id="目前收录10种排序算法"><a href="#目前收录10种排序算法" class="headerlink" title="目前收录10种排序算法"></a>目前收录10种排序算法</h1><h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] sort(<span class="keyword">int</span>[] array) &#123;</span><br><span class="line">        <span class="keyword">if</span> (array.length == <span class="number">0</span>)&#123;</span><br><span class="line">			<span class="keyword">return</span> array;</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">/*循环数组长度的次数*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++)&#123;</span><br><span class="line">            <span class="comment">/*从第0个元素开始，依次和后面的元素进行比较*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; array.length; j++)&#123;</span><br><span class="line">                <span class="comment">/*如果第j个元素比后面的第j+1元素大，交换两者的位置*/</span></span><br><span class="line">                <span class="keyword">if</span> (array[j + <span class="number">1</span>] &lt; array[j]) &#123;</span><br><span class="line">                    <span class="keyword">int</span> temp = array[j + <span class="number">1</span>];</span><br><span class="line">                    array[j + <span class="number">1</span>] = array[j];</span><br><span class="line">                    array[j] = temp;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> array;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
@@ -148,7 +192,7 @@
       </tags>
   </entry>
   <entry>
-    <title>spring</title>
+    <title>spring的源码解读一</title>
     <url>/2021/05/11/spring/</url>
     <content><![CDATA[<h1 id="Spring-源码学习简介"><a href="#Spring-源码学习简介" class="headerlink" title="Spring 源码学习简介"></a>Spring 源码学习简介</h1><ul>
 <li>源码初始，根据Jack老师，Spring源码系列笔记整理，其中很多流程梳理和注释标注，很多细节需要跟源码，甚至调试代码才能知道原理。希望给大家带来一点点收获。没毛病吧，老铁。<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2></li>
