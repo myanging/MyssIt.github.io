@@ -81,7 +81,10 @@
 <blockquote>
 <p>上面执行完后，使用方式是<br><img src="/other/git6.jpg"></p>
 </blockquote>
-]]></content>
+<blockquote>
+<p>设置完.gitignore文件，在操作那里，点击，打开命令行<br>输入以下命令：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">git rm -r --cached .</span><br><span class="line">git add .</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>git</category>
       </categories>
@@ -158,6 +161,18 @@
 ]]></content>
   </entry>
   <entry>
+    <title>spring甜点</title>
+    <url>/2021/05/12/spring%E7%94%9C%E7%82%B9/</url>
+    <content><![CDATA[<h1 id="主要记录spring一些小技巧"><a href="#主要记录spring一些小技巧" class="headerlink" title="主要记录spring一些小技巧"></a>主要记录spring一些小技巧</h1><h2 id="怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal"><a href="#怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal" class="headerlink" title="怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal"></a>怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span><br><span class="line">HttpServletRequest request = requestAttributes.getRequest();</span><br><span class="line">HttpServletResponse response = requestAttributes.getResponse();</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>spring</category>
+      </categories>
+      <tags>
+        <tag>spring甜点</tag>
+        <tag>spring</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>spring源码学习</title>
     <url>/2021/05/11/spring%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="杂谈IOC"><a href="#杂谈IOC" class="headerlink" title="杂谈IOC"></a>杂谈IOC</h1><h3 id="SmartInitializingSingleton"><a href="#SmartInitializingSingleton" class="headerlink" title="SmartInitializingSingleton"></a><code>SmartInitializingSingleton</code></h3><ul>
@@ -213,18 +228,6 @@
       <tags>
         <tag>spring</tag>
         <tag>spring源码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>spring甜点</title>
-    <url>/2021/05/12/spring%E7%94%9C%E7%82%B9/</url>
-    <content><![CDATA[<h1 id="主要记录spring一些小技巧"><a href="#主要记录spring一些小技巧" class="headerlink" title="主要记录spring一些小技巧"></a>主要记录spring一些小技巧</h1><h2 id="怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal"><a href="#怎么在请求中任何地方获取request和response-其实原理就是利用ThreadLocal" class="headerlink" title="怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal"></a>怎么在请求中任何地方获取request和response,其实原理就是利用ThreadLocal</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span><br><span class="line">HttpServletRequest request = requestAttributes.getRequest();</span><br><span class="line">HttpServletResponse response = requestAttributes.getResponse();</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>spring</category>
-      </categories>
-      <tags>
-        <tag>spring</tag>
-        <tag>spring甜点</tag>
       </tags>
   </entry>
   <entry>
